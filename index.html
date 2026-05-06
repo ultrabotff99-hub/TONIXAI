@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="ml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TONIX AI - PINNA MENU</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        :root {
+            --bg: #050b14;
+            --card: #0f172a;
+            --card-light: #1e293b;
+            --accent: #3b82f6;
+            --accent-glow: #3b82f680;
+            --text: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border: #1e293b;
+            --header: #020617;
+            --danger: #ef4444;
+            --success: #10b981;
+        }
+
+        .light-mode {
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --card-light: #f1f5f9;
+            --accent: #2563eb;
+            --text: #0f172a;
+            --text-secondary: #475569;
+            --border: #e2e8f0;
+            --header: #ffffff;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Pages */
+        .page {
+            display: none;
+            height: 100vh;
+            width: 100%;
+            position: absolute;
+            background: var(--bg);
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .page.active {
+            display: flex;
+            opacity: 1;
+            z-index: 20;
+        }
+
+        /* Login Page */
+        #login-page {
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+            background: radial-gradient(circle at 10% 20%, rgba(59,130,246,0.08) 0%, var(--bg) 90%);
+        }
+        .auth-card {
+            background: var(--card);
+            padding: 44px 32px;
+            border-radius: 40px;
+            width: 100%;
+            max-width: 420px;
+            text-align: center;
+            border: 1px solid var(--border);
+            box-shadow: 0 25px 40px -12px rgba(0, 0, 0, 0.5);
+        }
+        .auth-logo {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            border: 2px solid var(--accent);
+            margin-bottom: 20px;
+            object-fit: cover;
+        }
+        .auth-card h2 {
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent), #a855f7);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 20px;
+        }
+        input {
+            width: 100%;
+            padding: 16px 18px;
+            margin: 12px 0;
+            border-radius: 28px;
+            border: 1px solid var(--border);
+            background: var(--card-light);
+            color: var(--text);
+            outline: none;
+            font-size: 1rem;
+        }
+        input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border-radius: 40px;
+            border: none;
+            background: linear-gradient(95deg, var(--accent), #6366f1);
+            color: white;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .btn:active { transform: scale(0.97); }
+        .auth-link {
+            color: var(--accent);
+            cursor: pointer;
+            margin-top: 24px;
+            font-size: 14px;
+            text-decoration: underline;
+        }
+        .error-msg {
+            color: #ff6b6b;
+            font-size: 13px;
+            margin-top: 12px;
+            text-align: center;
+        }
+
+        /* Chat Page */
+        #chat-page {
+            flex-direction: column;
+        }
+        header {
+            padding: 18px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            background: var(--header);
+            z-index: 15;
+        }
+        .global-menu-btn {
+            width: 44px;
+            height: 44px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 24px;
+            color: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        .global-menu-btn:active { transform: scale(0.92); }
+
+        /* Bottom Drawer - PINNA MENU */
+        .bottom-drawer {
+            position: fixed;
+            bottom: -100%;
+            left: 0;
+            width: 100%;
+            background: var(--card);
+            border-radius: 32px 32px 0 0;
+            z-index: 1001;
+            transition: bottom 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.2);
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
+            border-top: 1px solid var(--border);
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+        .bottom-drawer.open { bottom: 0; }
+        .drawer-handle {
+            width: 50px;
+            height: 5px;
+            background: var(--text-secondary);
+            border-radius: 20px;
+            margin: 16px auto 20px;
+            cursor: pointer;
+        }
+        .drawer-item {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            padding: 16px 24px;
+            margin: 8px 16px;
+            background: var(--card-light);
+            border-radius: 28px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.2s;
+            color: var(--text);
+        }
+        .drawer-item:active {
+            background: var(--accent);
+            transform: scale(0.98);
+            color: white;
+        }
+        .drawer-header {
+            font-size: 20px;
+            font-weight: bold;
+            padding: 8px 24px;
+            color: var(--accent);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .close-drawer {
+            font-size: 28px;
+            cursor: pointer;
+            padding: 8px;
+        }
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 1000;
+            display: none;
+        }
+        .overlay.active { display: block; }
+
+        /* Chat Content */
+        #chat-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 20px 170px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+        .msg {
+            max-width: 85%;
+            line-height: 1.5;
+            border-radius: 24px;
+            padding: 14px 20px;
+            word-wrap: break-word;
+            animation: fadeSlide 0.2s ease;
+            position: relative;
+        }
+        @keyframes fadeSlide {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .user {
+            align-self: flex-end;
+            background: var(--accent);
+            color: white;
+            border-bottom-right-radius: 6px;
+        }
+        .ai {
+            align-self: flex-start;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-bottom-left-radius: 6px;
+        }
+        .msg-close {
+            position: absolute;
+            top: -10px;
+            right: -8px;
+            width: 24px;
+            height: 24px;
+            background: var(--danger);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 14px;
+            color: white;
+            opacity: 0;
+            transition: 0.2s;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+        .msg:hover .msg-close { opacity: 1; }
+
+        /* Input */
+        .input-container {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            padding: 12px 20px 28px;
+            background: var(--bg);
+            z-index: 100;
+            border-top: 1px solid var(--border);
+        }
+        .input-box {
+            background: var(--card);
+            border-radius: 48px;
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            padding: 6px 10px 6px 20px;
+        }
+        #user-msg {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text);
+            padding: 14px 8px;
+            outline: none;
+            font-size: 1rem;
+        }
+        .send-icon {
+            background: var(--accent);
+            border: none;
+            width: 44px;
+            height: 44px;
+            border-radius: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: white;
+            font-size: 20px;
+        }
+        #preview-container {
+            display: none;
+            padding: 8px 20px;
+            position: relative;
+        }
+        .img-preview {
+            width: 64px;
+            height: 64px;
+            border-radius: 18px;
+            border: 2px solid var(--accent);
+            object-fit: cover;
+        }
+
+        /* Admin Panel */
+        #admin-page {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg);
+            z-index: 200;
+            padding: 80px 24px 24px;
+            overflow-y: auto;
+            display: none;
+        }
+        #admin-page.active { display: block; }
+        .admin-rule-item {
+            background: var(--card-light);
+            padding: 14px 18px;
+            border-radius: 24px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid var(--accent);
+        }
+        .delete-rule {
+            background: var(--danger);
+            color: white;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        .admin-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .admin-btn {
+            flex: 1;
+            padding: 14px;
+            border-radius: 40px;
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+            text-align: center;
+        }
+        .admin-btn.save {
+            background: var(--success);
+            color: white;
+        }
+        .admin-btn.close {
+            background: var(--danger);
+            color: white;
+        }
+
+        /* Sidebar */
+        #sidebar {
+            position: fixed;
+            left: -100%;
+            top: 0;
+            height: 100%;
+            width: 280px;
+            background: var(--card);
+            z-index: 2000;
+            transition: left 0.3s;
+            padding: 40px 24px;
+            border-right: 1px solid var(--border);
+            box-shadow: 15px 0 35px rgba(0, 0, 0, 0.4);
+        }
+        #sidebar.open { left: 0; }
+        .menu-btn {
+            width: 100%;
+            padding: 14px 16px;
+            background: var(--card-light);
+            border-radius: 44px;
+            color: var(--text);
+            border: none;
+            margin-bottom: 16px;
+            text-align: left;
+            cursor: pointer;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <div id="drawer-overlay" class="overlay" onclick="closeBottomDrawer()"></div>
+
+    <!-- Sidebar -->
+    <div id="sidebar">
+        <div style="text-align: center; margin-bottom: 30px;">
+            <img src="https://cdn.corenexis.com/files/c/7934361720.webp" style="width: 70px; border-radius: 50%; border: 2px solid var(--accent);">
+            <h3 style="margin-top: 12px;">TONIX<span style="color:var(--accent);"> AI</span></h3>
+        </div>
+        <button class="menu-btn" onclick="toggleTheme(); closeSidebar()">🌓 Theme</button>
+        <button class="menu-btn" onclick="openAdminWithPassword(); closeSidebar()">🔐 Admin</button>
+        <button class="menu-btn" onclick="exportChatHistory(); closeSidebar()">💾 Export Chat</button>
+        <button class="menu-btn" onclick="clearChat(); closeSidebar()">🧹 Clear Chat</button>
+        <button class="menu-btn" onclick="logoutAccount(); closeSidebar()">🚪 Logout</button>
+        <button class="menu-btn" onclick="closeSidebar()">← Close</button>
+    </div>
+
+    <!-- PINNA BOTTOM MENU -->
+    <div id="bottom-drawer" class="bottom-drawer">
+        <div class="drawer-handle" onclick="closeBottomDrawer()"></div>
+        <div class="drawer-header">
+            <span>⚡ PINNA MENU</span>
+            <span class="close-drawer" onclick="closeBottomDrawer()">✕</span>
+        </div>
+        <div class="drawer-item" onclick="toggleTheme(); closeBottomDrawer();">
+            <span>☀️</span> Switch Theme
+        </div>
+        <div class="drawer-item" onclick="openAdminWithPassword(); closeBottomDrawer();">
+            <span>🔐</span> Admin Control
+        </div>
+        <div class="drawer-item" onclick="openSidebar(); closeBottomDrawer();">
+            <span>📂</span> Side Menu
+        </div>
+        <div class="drawer-item" onclick="exportChatHistory(); closeBottomDrawer();">
+            <span>💾</span> Export Chat
+        </div>
+        <div class="drawer-item" onclick="clearChat(); closeBottomDrawer();">
+            <span>🧹</span> Clear Chat
+        </div>
+        <div class="drawer-item" onclick="logoutAccount(); closeBottomDrawer();">
+            <span>🚪</span> Logout
+        </div>
+        <div style="height: 30px;"></div>
+    </div>
+
+    <!-- LOGIN PAGE - FAST LOGIN (any click goes to chat) -->
+    <div id="login-page" class="page active">
+        <div class="auth-card">
+            <img src="https://cdn.corenexis.com/files/c/7934361720.webp" class="auth-logo">
+            <h2>🔐 TONIX LOGIN</h2>
+            <input type="text" id="l-user" placeholder="Username (any)">
+            <input type="password" id="l-pass" placeholder="Password (any)">
+            <button class="btn" onclick="fastLogin()">🚀 ENTER CHAT</button>
+            <div class="auth-link" onclick="fastLogin()">✨ Click anywhere or press ENTER</div>
+        </div>
+    </div>
+
+    <!-- CHAT PAGE -->
+    <div id="chat-page" class="page">
+        <header>
+            <div class="global-menu-btn" onclick="openBottomDrawer()">☰</div>
+            <div style="font-weight: 700; font-size: 1.3rem;">TONIX AI</div>
+            <div onclick="toggleTheme()" style="cursor:pointer; font-size: 24px;">🌓</div>
+        </header>
+        
+        <div id="chat-content">
+            <div class="msg ai">✨ TONIX AI ready! Click ☰ button for PINNA menu. ✨<span class="msg-close" onclick="this.parentElement.remove()">✕</span></div>
+        </div>
+
+        <div id="preview-container">
+            <img id="img-output" class="img-preview">
+            <div onclick="clearPreview()" style="position:absolute; top:-5px; left:72px; background:rgba(0,0,0,0.7); width:22px; height:22px; border-radius:30px; text-align:center; color:crimson; cursor:pointer;">✖</div>
+        </div>
+
+        <div class="input-container">
+            <div class="input-box">
+                <label for="file-input" style="font-size:28px; color:var(--accent); margin-right:12px; cursor:pointer;">📎</label>
+                <input type="file" id="file-input" style="display:none;" accept="image/*" onchange="previewImage(event)">
+                <input type="text" id="user-msg" placeholder="Type your message..." onkeypress="if(event.key==='Enter') sendMsg()">
+                <div class="send-icon" onclick="sendMsg()">➤</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADMIN PANEL -->
+    <div id="admin-page">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+            <h2 style="color:var(--accent);">⚙️ Admin Panel - Live AI Rules</h2>
+        </div>
+        <div id="admin-list"></div>
+        <div style="text-align:center; padding: 20px; font-size: 40px; cursor: pointer; color: var(--accent);" onclick="addCommand()">+ ADD RULE</div>
+        <div class="admin-buttons">
+            <button class="admin-btn save" onclick="saveAndGoToChat()">💾 SAVE & GO TO CHAT</button>
+            <button class="admin-btn close" onclick="closeAdminAndGoChat()">✕ CLOSE & GO CHAT</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API = "https://apisaqib.vercel.app/api/v1/1015?q=";
+    let behaviors = [
+        "TONIX AI premium assistant",
+        "Detect user language (Malayalam/English/Hindi/Tamil/manglesh) and reply same language",
+        "Use friendly emojis, be helpful and smart"
+    ];
+    let selectedImage = null;
+    let currentUser = null;
+    let isAdminLoggedIn = false;
+
+    // Load saved behaviors from localStorage
+    function loadBehaviors() {
+        const saved = localStorage.getItem('tonix_ai_behaviors');
+        if(saved) {
+            behaviors = JSON.parse(saved);
+        }
+    }
+    
+    // Save behaviors to localStorage and update AI live
+    function saveBehaviors() {
+        localStorage.setItem('tonix_ai_behaviors', JSON.stringify(behaviors));
+        addSystemMessage("🔄 AI rules saved live! New behavior activated.");
+    }
+    
+    // FAST LOGIN - any username/password works, instantly goes to chat
+    function fastLogin() {
+        const username = document.getElementById('l-user').value.trim();
+        const password = document.getElementById('l-pass').value.trim();
+        
+        if(username !== "") {
+            currentUser = username;
+            localStorage.setItem('tonix_session', username);
+        } else {
+            currentUser = "Guest";
+            localStorage.setItem('tonix_session', 'Guest');
+        }
+        
+        // Save user if new (optional)
+        if(username !== "" && password !== "") {
+            const users = JSON.parse(localStorage.getItem('tonix_users') || '{}');
+            if(!users[username]) {
+                users[username] = password;
+                localStorage.setItem('tonix_users', JSON.stringify(users));
+            }
+        }
+        
+        showPage('chat-page');
+        addSystemMessage(`✨ Welcome ${currentUser}! TONIX AI ASSISTANT is ready. ✨`);
+    }
+    
+    // Enter key on login page
+    document.addEventListener('keypress', function(e) {
+        if(e.key === 'Enter' && document.getElementById('login-page').classList.contains('active')) {
+            fastLogin();
+        }
+    });
+    
+    // Admin with Password @3007
+    function openAdminWithPassword() {
+        const pwd = prompt("🔐 Enter Admin Password:");
+        if(pwd === "@3007") {
+            isAdminLoggedIn = true;
+            showAdminPage();
+            addSystemMessage("🔐 Admin mode enabled with password.");
+        } else if(pwd !== null) {
+            alert("❌ Wrong password! Admin access denied.");
+        }
+    }
+    
+    function showAdminPage() {
+        document.getElementById('admin-page').classList.add('active');
+        document.getElementById('chat-page').classList.remove('active');
+        renderAdmin();
+        closeBottomDrawer();
+        closeSidebar();
+    }
+    
+    function logoutAccount() {
+        localStorage.removeItem('tonix_session');
+        currentUser = null;
+        isAdminLoggedIn = false;
+        document.getElementById('l-user').value = '';
+        document.getElementById('l-pass').value = '';
+        showPage('login-page');
+        closeBottomDrawer();
+        closeSidebar();
+        addSystemMessage = function() {}; // reset
+    }
+    
+    function addSystemMessage(text) {
+        const chat = document.getElementById('chat-content');
+        if(!chat) return;
+        const msgDiv = document.createElement('div');
+        msgDiv.className = "msg ai";
+        const closeBtn = document.createElement('span');
+        closeBtn.className = 'msg-close';
+        closeBtn.innerHTML = '✕';
+        closeBtn.onclick = (function(el) { return function() { el.remove(); }; })(msgDiv);
+        msgDiv.appendChild(closeBtn);
+        const contentSpan = document.createElement('span');
+        contentSpan.innerHTML = `📡 ${text}`;
+        msgDiv.appendChild(contentSpan);
+        chat.appendChild(msgDiv);
+        chat.scrollTop = chat.scrollHeight;
+    }
+    
+    function showPage(id) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        closeBottomDrawer();
+        closeSidebar();
+        if(id === 'admin-page') renderAdmin();
+    }
+    
+    // PINNA MENU Functions
+    function openBottomDrawer() {
+        document.getElementById('bottom-drawer').classList.add('open');
+        document.getElementById('drawer-overlay').classList.add('active');
+    }
+    function closeBottomDrawer() {
+        document.getElementById('bottom-drawer').classList.remove('open');
+        document.getElementById('drawer-overlay').classList.remove('active');
+    }
+    function openSidebar() {
+        document.getElementById('sidebar').classList.add('open');
+    }
+    function closeSidebar() {
+        document.getElementById('sidebar').classList.remove('open');
+    }
+    function toggleTheme() {
+        document.body.classList.toggle('light-mode');
+        localStorage.setItem('tonix_theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
+    }
+    
+    // ADMIN Functions
+    function saveAndGoToChat() {
+        saveBehaviors();
+        closeAdminAndGoChat();
+        addSystemMessage("✅ Admin rules saved! AI behavior updated.");
+    }
+    
+    function closeAdminAndGoChat() {
+        document.getElementById('admin-page').classList.remove('active');
+        document.getElementById('chat-page').classList.add('active');
+        closeBottomDrawer();
+        closeSidebar();
+    }
+    
+    function renderAdmin() {
+        const div = document.getElementById('admin-list');
+        if(!div) return;
+        div.innerHTML = behaviors.map((b,i)=>`
+            <div class="admin-rule-item">
+                <span class="admin-rule-text">🤖 ${b}</span>
+                <button class="delete-rule" onclick="deleteRule(${i})">✕</button>
+            </div>
+        `).join('');
+        if(behaviors.length === 0) div.innerHTML = '<div style="text-align:center; padding:20px;">✨ No custom rules yet</div>';
+    }
+    
+    function deleteRule(index) {
+        behaviors.splice(index, 1);
+        renderAdmin();
+        localStorage.setItem('tonix_ai_behaviors', JSON.stringify(behaviors));
+        addSystemMessage("🗑️ Rule deleted. AI behavior updated.");
+    }
+    
+    function addCommand() {
+        let cmd = prompt("✍️ Add new AI instruction (Live effect):");
+        if(cmd && cmd.trim()) { 
+            behaviors.push(cmd.trim()); 
+            renderAdmin();
+            localStorage.setItem('tonix_ai_behaviors', JSON.stringify(behaviors));
+            addSystemMessage("➕ New rule added! AI behavior updated.");
+        }
+    }
+    
+    // CHAT Functions
+    function exportChatHistory() {
+        const messages = document.getElementById('chat-content').innerText;
+        const blob = new Blob([messages], {type: 'text/plain'});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'tonix_chat.txt';
+        a.click();
+        URL.revokeObjectURL(a.href);
+    }
+    function clearChat() {
+        if(confirm("Clear all conversation?")) {
+            document.getElementById('chat-content').innerHTML = `<div class="msg ai">✨ Chat cleared. Fresh start! ✨<span class="msg-close" onclick="this.parentElement.remove()">✕</span></div>`;
+        }
+    }
+    
+    function previewImage(e) {
+        const reader = new FileReader();
+        reader.onload = () => {
+            document.getElementById('img-output').src = reader.result;
+            document.getElementById('preview-container').style.display = 'block';
+            selectedImage = reader.result;
+        };
+        reader.readAsDataURL(e.target.files[0]);
+    }
+    function clearPreview() {
+        document.getElementById('preview-container').style.display = 'none';
+        selectedImage = null;
+    }
+    
+    async function sendMsg() {
+        const input = document.getElementById('user-msg');
+        const chat = document.getElementById('chat-content');
+        const text = input.value.trim();
+        if(!text && !selectedImage) return;
+        
+        const userMsgDiv = document.createElement('div');
+        userMsgDiv.className = "msg user";
+        if(selectedImage) {
+            userMsgDiv.innerHTML = `<img src="${selectedImage}" style="max-width:100%; max-height:150px; border-radius:16px; margin-bottom:8px;"><br>${text || "📷 Image"}`;
+        } else {
+            userMsgDiv.innerHTML = text;
+        }
+        chat.appendChild(userMsgDiv);
+        
+        const currentImage = selectedImage;
+        clearPreview();
+        input.value = "";
+        chat.scrollTop = chat.scrollHeight;
+        
+        const typingDiv = document.createElement('div');
+        typingDiv.className = "msg ai";
+        typingDiv.innerHTML = "💭 TIPENG.°.";
+        chat.appendChild(typingDiv);
+        chat.scrollTop = chat.scrollHeight;
+        
+        try {
+            let prompt = `Instructions: ${behaviors.join(". ")}. User message: ${text || "Describe this image"}`;
+            let res = await fetch(API + encodeURIComponent(prompt));
+            let result = await res.text();
+            
+            chat.removeChild(typingDiv);
+            
+            const aiMsgDiv = document.createElement('div');
+            aiMsgDiv.className = "msg ai";
+            const closeBtn = document.createElement('span');
+            closeBtn.className = 'msg-close';
+            closeBtn.innerHTML = '✕';
+            closeBtn.onclick = (function(el) { return function() { el.remove(); }; })(aiMsgDiv);
+            aiMsgDiv.appendChild(closeBtn);
+            const contentSpan = document.createElement('span');
+            aiMsgDiv.appendChild(contentSpan);
+            chat.appendChild(aiMsgDiv);
+            
+            let i = 0;
+            function typeChar() {
+                if(i < result.length) {
+                    contentSpan.innerHTML += result.charAt(i);
+                    i++;
+                    chat.scrollTop = chat.scrollHeight;
+                    setTimeout(typeChar, 12);
+                }
+            }
+            typeChar();
+        } catch(e) {
+            chat.removeChild(typingDiv);
+            const errorMsg = document.createElement('div');
+            errorMsg.className = "msg ai";
+            const closeBtn = document.createElement('span');
+            closeBtn.className = 'msg-close';
+            closeBtn.innerHTML = '✕';
+            closeBtn.onclick = (function(el) { return function() { el.remove(); }; })(errorMsg);
+            errorMsg.appendChild(closeBtn);
+            errorMsg.innerHTML += "⚠️ Network error! Please try again.";
+            chat.appendChild(errorMsg);
+            chat.scrollTop = chat.scrollHeight;
+        }
+    }
+    
+    function restoreSession() {
+        loadBehaviors();
+        const savedSession = localStorage.getItem('tonix_session');
+        if(savedSession) {
+            currentUser = savedSession;
+            showPage('chat-page');
+            setTimeout(() => {
+                addSystemMessage(`🔌 Session restored. Welcome back ${currentUser}!`);
+            }, 100);
+        } else {
+            showPage('login-page');
+        }
+    }
+    
+    // Load theme
+    const savedTheme = localStorage.getItem('tonix_theme');
+    if(savedTheme === 'light') document.body.classList.add('light-mode');
+    
+    restoreSession();
+    
+    // Make functions global
+    window.fastLogin = fastLogin;
+    window.logoutAccount = logoutAccount;
+    window.openBottomDrawer = openBottomDrawer;
+    window.closeBottomDrawer = closeBottomDrawer;
+    window.openSidebar = openSidebar;
+    window.closeSidebar = closeSidebar;
+    window.toggleTheme = toggleTheme;
+    window.openAdminWithPassword = openAdminWithPassword;
+    window.saveAndGoToChat = saveAndGoToChat;
+    window.closeAdminAndGoChat = closeAdminAndGoChat;
+    window.exportChatHistory = exportChatHistory;
+    window.clearChat = clearChat;
+    window.addCommand = addCommand;
+    window.deleteRule = deleteRule;
+    window.previewImage = previewImage;
+    window.clearPreview = clearPreview;
+    window.sendMsg = sendMsg;
+    window.renderAdmin = renderAdmin;
+</script>
+</body>
+</html>
